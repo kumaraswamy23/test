@@ -1,65 +1,11 @@
-public static String domain = "https://WIN-AK3PCJUGMJE.localhost.com:9999/pf-admin-api/v1";
-	public static RootConnection connectionConvert(ConnectionModel connectionModel) {
-		RootConnection rootConnection = new RootConnection();
-		rootConnection.setType("SP");
-		rootConnection.setId(connectionModel.getConnectionId());
-		rootConnection.setName(connectionModel.getConnectionName());
-		rootConnection.setEntityId(connectionModel.getConnectionEntityId());
-		rootConnection.setActive(true);
-		rootConnection.setLoggingMode("STANDARD");
-		rootConnection.setVirtualEntityIds(new ArrayList<Object>());
-		rootConnection.setLicenseConnectionGroup("");
-		ContactInfo contact = new ContactInfo();
-		rootConnection.setContactInfo(contact);
-		
-		SigningKeyPairRef SigningKeyPairRef = new SigningKeyPairRef(connectionModel.getConnectionCertId(),domain+"/keyPairs/signing/"+connectionModel.getConnectionCertId());
-		SigningSettings signingSettings = new SigningSettings();
-		signingSettings.setIncludeCertInSignature(false);
-		signingSettings.setIncludeRawKeyInSignature(false);
-		signingSettings.setAlgorithm("SHA256withRSA");
-		signingSettings.setSigningKeyPairRef(SigningKeyPairRef);
-		Credentials credentials = new Credentials();
-		credentials.setCerts(new ArrayList<Object>());
-		credentials.setSigningSettings(signingSettings);
-		rootConnection.setCredentials(credentials);
-		rootConnection.setConnectionTargetType("STANDARD");
-		SsoServiceEndpoint ssoServiceEndpoint = new SsoServiceEndpoint("POST",connectionModel.getConnectionACSUrl(),true,1);
-		ArrayList<SsoServiceEndpoint> ssoServiceEndpoints = new ArrayList<SsoServiceEndpoint>();
-		ssoServiceEndpoints.add(ssoServiceEndpoint);
-		AttributesFormat coreAttributes = new AttributesFormat("SAML_SUBJECT","urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified");
-		AttributesFormat extendedAttributes = new AttributesFormat("firstname","urn:mace:shibboleth:1.0:attributeNamespace:uri");
-		AttributesFormat extendedAttributes1 = new AttributesFormat("lastname","urn:mace:shibboleth:1.0:attributeNamespace:uri");
-		ArrayList<AttributesFormat> coreAttributesList = new ArrayList<AttributesFormat>();
-		coreAttributesList.add(coreAttributes);
-		ArrayList<AttributesFormat> extendedAttributesList = new ArrayList<AttributesFormat>();
-		extendedAttributesList.add(extendedAttributes);
-		extendedAttributesList.add(extendedAttributes1);
-		com.ping.admin.api.connectionmodel.AttributeContract attributeContract = new com.ping.admin.api.connectionmodel.AttributeContract(coreAttributesList,extendedAttributesList);
-		Firstname firstname = new Firstname(new Source("AUTHENTICATION_POLICY_CONTRACT"),"dn");
-		SAMLSUBJECT samlSubject = new SAMLSUBJECT(new Source("AUTHENTICATION_POLICY_CONTRACT"),"mail");
-		Lastname lastName = new Lastname(new Source("AUTHENTICATION_POLICY_CONTRACT"),"dn");
-		AttributeContractFulfillment attributeContractFulfillment = new AttributeContractFulfillment(firstname,samlSubject,lastName);
-		AuthenticationPolicyContractRef authenticationPolicyContractRef = new AuthenticationPolicyContractRef(connectionModel.getPolicyContractId(),domain+"/authenticationPolicyContracts/"+connectionModel.getPolicyContractId());
-		AuthenticationPolicyContractAssertionMapping auth = new AuthenticationPolicyContractAssertionMapping(new ArrayList<Object>(),attributeContractFulfillment,new IssuanceCriteria(new ArrayList<Object>()),authenticationPolicyContractRef,false,new ArrayList<Object>(),false);
-		ArrayList<AuthenticationPolicyContractAssertionMapping> authList = new ArrayList<AuthenticationPolicyContractAssertionMapping>();
-		authList.add(auth);
-		
-		AssertionLifetime assertionLifetime = new AssertionLifetime(5,5);
-		EncryptionPolicy encryptionPolicy = new EncryptionPolicy(false,false,false,new ArrayList<Object>());
-		
-		SpBrowserSso spBrowserSso = new SpBrowserSso();
-		spBrowserSso.setProtocol("SAML20");
-		spBrowserSso.setSignAssertions(false);
-		spBrowserSso.setSignResponseAsRequired(true);
-		spBrowserSso.setSpSamlIdentityMapping("STANDARD");
-		spBrowserSso.setRequireSignedAuthnRequests(false);
-		spBrowserSso.setAssertionLifetime(assertionLifetime);
-		spBrowserSso.setEncryptionPolicy(encryptionPolicy);
-		spBrowserSso.setAdapterMappings(new ArrayList<Object>());
-		spBrowserSso.setSsoServiceEndpoints(ssoServiceEndpoints);
-		spBrowserSso.setAttributeContract(attributeContract);
-		spBrowserSso.setAuthenticationPolicyContractAssertionMappings(authList);
-		rootConnection.setSpBrowserSso(spBrowserSso);
-		
-		return rootConnection;
-	}
+String url = "https://jsonplaceholder.typicode.com/posts";
+String authStr = "username:password";
+String base64Creds = Base64.getEncoder().encodeToString(authStr.getBytes());   
+HttpHeaders headers = new HttpHeaders();
+headers.add("Authorization", "Basic " + base64Creds);   
+HttpEntity request = new HttpEntity(headers);   
+ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, request, String.class);    
+String json = response.getBody();
+
+
+
